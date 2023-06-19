@@ -21,13 +21,9 @@ const {
 const { X509Certificate } = require("crypto");
 const selfSigned = require("selfsigned");
 
-const generateCert = (/** @type {string} */ dir) => {
-  const certDir = path.join(dir, "node_modules", ".next-dev-mobile");
-  if (!fs.existsSync(certDir)) {
-    fs.mkdirSync(certDir, { recursive: true });
-  }
-  const certPath = path.join(certDir, "cert-sha256.pem");
-  const keyPath = path.join(certDir, "key-sha256.pem");
+const loadCert = ( /** @type {string} */ certDir) => {
+  const certPath = path.join(certDir, "localhost.pem");
+  const keyPath = path.join(certDir, "localhost-key.pem");
   const existingCert =
     fs.existsSync(certPath) && fs.readFileSync(certPath, { encoding: "utf-8" });
   const existingKey =
@@ -38,6 +34,13 @@ const generateCert = (/** @type {string} */ dir) => {
     new Date(new X509Certificate(existingCert).validTo) > new Date()
   ) {
     return { cert: existingCert, key: existingKey };
+  }
+}
+
+const generateCert = (/** @type {string} */ dir) => {
+  const certDir = path.join(dir, "node_modules", ".next-dev-mobile");
+  if (!fs.existsSync(certDir)) {
+    fs.mkdirSync(certDir, { recursive: true });
   }
   console.log("Generating Fresh self signed https certificate.");
   const selfSignedCert = selfSigned.generate(undefined, {
@@ -66,9 +69,11 @@ const nextDev = (argv) => {
     "--show-all": Boolean,
     "--root": String,
     "--qr": Boolean,
+    "--cert-dir": String,
     "--https": Boolean,
     // Aliases
     "-h": "--help",
+    "-d": "--cert-dir",
     "-p": "--port",
     "-q": "--qr",
     "-s": "--https",
@@ -101,6 +106,7 @@ Usage
 If no directory is provided, the current directory will be used.
 
 Options
+  --cert-dir, -d  A directory containing a localhost.pem and localhost-key.pem files
   --port, -p      A port number on which to start the application
   --hostname, -H  Hostname on which to start the application (default: 0.0.0.0)
   --https, -s     Run application on https with self signed https certificate
@@ -117,7 +123,11 @@ Options
   }
 
   //Generate dev server certificate if needed.
-  const cert = args["--https"] ? generateCert(dir) : undefined;
+  let cert = args["--https"] ? generateCert(dir) : undefined;
+
+  //Fallback on cert-dir if provided
+  const certDir = args["--cert-dir"];
+  cert = !cert && args['--cert-dir'] ? loadCert(certDir) : undefined;
 
   const port = getPort(args);
   // If neither --port nor PORT were specified, it's okay to retry new ports.
