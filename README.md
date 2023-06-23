@@ -10,7 +10,7 @@ Install `next-dev-https` from npm with any package manager into your existing ne
 
 - `--qr/-q` Print a phone scannable QR code of your dev server's local network url on startup and `q` or `Q` press.
 - `--https/-s` Generate and use a self signed https certificate for the dev server.
-
+- `--user-cert-dir/-d` A user-level directory containing a localhost.pem and localhost-key.pem files, relative to `os.homedir`  
 ### Example package json
 
 ```jsonc

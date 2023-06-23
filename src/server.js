@@ -20,6 +20,7 @@ const {
 } = require("./utils");
 const { X509Certificate } = require("crypto");
 const selfSigned = require("selfsigned");
+const os = require("os");
 
 const loadCert = ( /** @type {string} */ certDir) => {
   const certPath = path.join(certDir, "localhost.pem");
@@ -69,11 +70,11 @@ const nextDev = (argv) => {
     "--show-all": Boolean,
     "--root": String,
     "--qr": Boolean,
-    "--cert-dir": String,
+    "--user-cert-dir": String,
     "--https": Boolean,
     // Aliases
     "-h": "--help",
-    "-d": "--cert-dir",
+    "-d": "--user-cert-dir",
     "-p": "--port",
     "-q": "--qr",
     "-s": "--https",
@@ -106,7 +107,7 @@ Usage
 If no directory is provided, the current directory will be used.
 
 Options
-  --cert-dir, -d  A directory containing a localhost.pem and localhost-key.pem files
+  --user-cert-dir, -d  A user-level directory containing a localhost.pem and localhost-key.pem files
   --port, -p      A port number on which to start the application
   --hostname, -H  Hostname on which to start the application (default: 0.0.0.0)
   --https, -s     Run application on https with self signed https certificate
@@ -125,9 +126,9 @@ Options
   //Generate dev server certificate if needed.
   let cert = args["--https"] ? generateCert(dir) : undefined;
 
-  //Fallback on cert-dir if provided
-  const certDir = args["--cert-dir"];
-  cert = !cert && args['--cert-dir'] ? loadCert(certDir) : undefined;
+  //Fallback on user-cert-dir if provided
+  const certDir = args["--user-cert-dir"];
+  cert = !cert && certDir ? loadCert(path.resolve(os.homedir(), certDir)) : undefined;
 
   const port = getPort(args);
   // If neither --port nor PORT were specified, it's okay to retry new ports.
