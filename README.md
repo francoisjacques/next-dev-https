@@ -28,7 +28,7 @@ _Tip: Don't use a port where you regulary host http stuff, your browser will rem
 
 ## Trusted certs?
 
-This package uses [selfsigned](https://www.npmjs.com/package/selfsigned) to generate certs and does not make your browser trust them. Even if root certs are added to your local computer, your phone and other devices will still not trust them, making the advantage very minor compared to the bad security practice of messing around with root CAs on your computer. At the time of writing (2022) most browser seems to have adequate ways of clicking through https security warnings.
+You can use trusted certs located in a directory relative to your user directory using the argument `--user-cert-dir`. If generated locally, the authority must be add to your system's certificate autorities store.
 
 ## Turbopack?
 
